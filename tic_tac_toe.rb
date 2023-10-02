@@ -1,5 +1,5 @@
 require 'ruby2d'
-require './board.rb'
+require './board'
 
 WINDOW_SIZE = 680
 TILE_GAP = 20
@@ -47,7 +47,8 @@ def generate_table(x_coord, y_coord)
 end
 
 def mouse_inside_tile?(event, tile)
-  event.x.between?(tile[:tile].x1, tile[:tile].x3) && event.y.between?(tile[:tile].y1, tile[:tile].y3)
+  event.x.between?(tile[:tile].x1, tile[:tile].x3) &&
+    event.y.between?(tile[:tile].y1, tile[:tile].y3)
 end
 
 def create_mark(mark_path, x_coord, y_coord)
@@ -60,16 +61,39 @@ def create_mark(mark_path, x_coord, y_coord)
   )
 end
 
+def clear_marks(marks)
+  marks.each(&:remove)
+  marks.clear
+end
+
 table = generate_table(0, 0)
+marks = []
 
 on :mouse_down do |event|
   if event.button == :left
     table.each do |tile|
-      next unless mouse_inside_tile?(event, tile) && board.spot_unmarked?(tile[:position])
+      next unless mouse_inside_tile?(event, tile) &&
+      board.spot_unmarked?(tile[:position])
 
-      path = board.x_turn ? PLAYER_X_PATH : PLAYER_O_PATH 
-      create_mark(path, tile[:tile].x, tile[:tile].y)
+      path = board.x_turn ? PLAYER_X_PATH : PLAYER_O_PATH
+      marks << create_mark(path, tile[:tile].x, tile[:tile].y)
       board.update_board(tile[:position])
+
+      if board.win?
+        winner = board.x_turn ? 'x' : 'o'
+        puts "the winner is #{winner}"
+        marks = clear_marks(marks)
+        board.clear_board
+        next
+      end
+
+      board.change_turn
+
+      next unless board.board_full?
+
+      puts 'board full' if board.board_full?
+      marks = clear_marks(marks)
+      board.clear_board
     end
   end
 end
