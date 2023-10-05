@@ -1,5 +1,6 @@
 class Board
-  attr_accessor :board_array, :x_turn, :winner
+  attr_accessor :board_array, :current_turn, :winner, :player_mode, :menu_active, 
+  :last_turn
 
   WIN_CONDITIONS = [
     [0, 1, 2],
@@ -13,9 +14,11 @@ class Board
   ]
 
   def initialize
-    @x_turn = true
+    @current_turn = true # current_turn = true - is x's turn and false is o's turn
+    @last_turn = false
     @board_array = Array.new(9, '')
-    @winner = ''
+    @player_mode = true
+    @menu_active = true
   end
 
   def spot_unmarked?(index)
@@ -23,11 +26,12 @@ class Board
   end
 
   def update_board(index)
-    board_array[index] = x_turn ? 'x' : 'o'
+    board_array[index] = current_turn ? 'x' : 'o'
   end
 
   def change_turn
-    self.x_turn = !x_turn
+    self.last_turn = current_turn
+    self.current_turn = !current_turn
   end
 
   def board_full?
@@ -36,7 +40,8 @@ class Board
 
   def clear_board
     self.board_array = Array.new(9, '')
-    self.x_turn = true
+    self.current_turn = true
+    self.last_turn = false
   end
 
   def win?
